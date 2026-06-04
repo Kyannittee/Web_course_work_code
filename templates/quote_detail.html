@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Детали цитаты</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5 class="text-muted">Текст цитаты</h5>
+                    <p class="fs-4 fst-italic">"{{ quote.text | nl2br | safe }}"</p>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Фильм</h5>
+                        <p>{{ quote.movie.title if quote.movie else 'Не указан' }}</p>
+                        
+                        {% if quote.movie.release_year %}
+                        <h5 class="text-muted mt-3">Год выпуска</h5>
+                        <p>{{ quote.movie.release_year }}</p>
+                        {% endif %}
+                        
+                        {% if quote.movie.director %}
+                        <h5 class="text-muted mt-3">Режиссёр</h5>
+                        <p>{{ quote.movie.director }}</p>
+                        {% endif %}
+                        
+                        {% if quote.movie.genre %}
+                        <h5 class="text-muted mt-3">Жанр</h5>
+                        <p>{{ quote.movie.genre.name }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        {% if quote.character_name %}
+                        <h5 class="text-muted">Персонаж</h5>
+                        <p>{{ quote.character_name }}</p>
+                        {% endif %}
+                        
+                        {% if quote.timestamp %}
+                        <h5 class="text-muted mt-3">Таймкод</h5>
+                        <p>{{ quote.timestamp }}</p>
+                        {% endif %}
+                        
+                        <h5 class="text-muted mt-3">Добавлено</h5>
+                        <p>{{ quote.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                        
+                        {% if quote.author %}
+                        <h5 class="text-muted mt-3">Добавил</h5>
+                        <p>{{ quote.author.login }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">← Назад</a>
+                    {% if quote.user_id == current_user.id or current_user.role == 'admin' %}
+                        <a href="{{ url_for('edit_quote', id=quote.id) }}" class="btn btn-warning">Редактировать</a>
+                        <a href="{{ url_for('delete_quote', id=quote.id) }}" class="btn btn-danger" onclick="return confirm('Удалить цитату?')">Удалить</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

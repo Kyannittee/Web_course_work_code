@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-warning">Найден дубликат фильма!</h2>
+    
+    <div class="alert alert-warning">
+        <p>Фильм <strong>"{{ form.title.data }}"</strong> уже существует в базе данных.</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4>Текущий фильм (будет удалён)</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Название:</strong> {{ old_movie.title }}</p>
+                    <p><strong>Цитат:</strong> {{ old_movie.quotes|length }}</p>
+                    <p><strong>Добавил:</strong> {{ old_movie.added_by_user.login }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4>Существующий фильм (останется)</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Название:</strong> {{ new_movie.title }}</p>
+                    <p><strong>Цитат:</strong> {{ new_movie.quotes|length }}</p>
+                    <p><strong>Добавил:</strong> {{ new_movie.added_by_user.login }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_merge_movies') }}" class="mt-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="old_movie_id" value="{{ old_movie.id }}">
+        <input type="hidden" name="new_movie_id" value="{{ new_movie.id }}">
+        
+        <div class="alert alert-info">
+            <h4>Что произойдёт:</h4>
+            <ul>
+                <li>Все цитаты из фильма <strong>"{{ old_movie.title }}"</strong> будут перенесены в <strong>"{{ new_movie.title }}"</strong></li>
+                <li>Фильм <strong>"{{ old_movie.title }}"</strong> будет удалён</li>
+                <li>Ни одна цитата не потеряется</li>
+            </ul>
+        </div>
+        
+        <button type="submit" class="btn btn-success" name="action" value="merge">
+            Да, объединить фильмы
+        </button>
+        <a href="{{ url_for('admin_movies') }}" class="btn btn-secondary">Отмена</a>
+        
+        <button type="submit" class="btn btn-danger float-end" name="action" value="rename">
+            Нет, оставить как есть (просто переименовать)
+        </button>
+    </form>
+</div>
+{% endblock %}

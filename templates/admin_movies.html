@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Админ-панель</h1>
+</div>
+
+<div class="btn-group mb-4 w-100">
+    <a href="{{ url_for('admin_movies') }}" class="btn btn-primary btn-lg active">Фильмы</a>
+    <a href="{{ url_for('admin_genres') }}" class="btn btn-outline-primary btn-lg">Жанры</a>
+</div>
+
+<div class="mb-4">
+    <a href="{{ url_for('admin_movie_add') }}" class="btn btn-success btn-lg w-100">+ Добавить фильм</a>
+</div>
+
+<!-- Таблица с фильмами -->
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0">Список всех фильмов</h4>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Название</th>
+                        <th>Год</th>
+                        <th>Режиссёр</th>
+                        <th>Жанр</th>
+                        <th>Добавил</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movie in movies %}
+                    <tr>
+                        <td>{{ movie.title }}</td>
+                        <td>{{ movie.release_year or '-' }}</td>
+                        <td>{{ movie.director or '-' }}</td>
+                        <td>{{ movie.genre.name if movie.genre else '-' }}</td>
+                        <td>{{ movie.added_by_user.login if movie.added_by_user else '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_movie_edit', id=movie.id) }}" class="btn btn-sm btn-warning">Редактировать</a>
+                            <a href="#" class="btn btn-sm btn-danger delete-btn" data-url="{{ url_for('admin_movie_delete', id=movie.id) }}">Удалить</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Нет фильмов</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

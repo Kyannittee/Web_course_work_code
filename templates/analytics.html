@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center mb-4">Аналитика</h1>
+
+<!-- Кнопки переключения (только для админа) -->
+{% if current_user.role == 'admin' %}
+<div class="text-center mb-4">
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary active" id="btnMyAnalytics">Моя аналитика</button>
+        <button type="button" class="btn btn-outline-primary" id="btnAdminAnalytics">Общая аналитика</button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Блок аналитики -->
+<div id="myAnalyticsBlock">
+    <div class="card" style="max-width: 800px;">
+        <div class="card-body">
+            <!-- Топ фильмов -->
+            <div class="mb-4">
+                <h5>Мои фильмы</h5>
+                <div style="max-width: 500px;">
+                    <canvas id="userMoviesChart" height="250" width="500"></canvas>
+                </div>
+            </div>
+            
+            <!-- Жанры -->
+            <div class="mb-4">
+                <h5>Мои жанры</h5>
+                <div style="max-width: 400px;">
+                    <canvas id="userGenresChart" height="300" width="400"></canvas>
+                </div>
+            </div>
+            
+            <!-- Динамика по месяцам -->
+            <div class="mb-2">
+                <h5>Моя динамика по месяцам</h5>
+                <div style="max-width: 600px;">
+                    <canvas id="userMonthlyChart" height="250" width="600"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Блок общей аналитики (только для админа, скрыт по умолчанию) -->
+{% if current_user.role == 'admin' %}
+<div id="adminAnalyticsBlock" style="display: none;">
+    <div class="card" style="max-width: 800px;">
+        <div class="card-header bg-warning">
+            <h4 class="mb-0">Общая аналитика</h4>
+        </div>
+        <div class="card-body">
+            <!-- Топ фильмов в системе -->
+            <div class="mb-4">
+                <h5>Топ-5 фильмов в системе</h5>
+                <div style="max-width: 500px;">
+                    <canvas id="adminMoviesChart" height="250" width="500"></canvas>
+                </div>
+            </div>
+            
+            <!-- Топ пользователей -->
+            <div class="mb-4">
+                <h5>Топ-5 активных пользователей</h5>
+                <div style="max-width: 500px;">
+                    <canvas id="adminUsersChart" height="250" width="500"></canvas>
+                </div>
+            </div>
+            
+            <!-- Жанры в системе -->
+            <div class="mb-4">
+                <h5>Жанры в системе</h5>
+                <div style="max-width: 400px;">
+                    <canvas id="adminGenresChart" height="300" width="400"></canvas>
+                </div>
+            </div>
+            
+            <!-- Общая динамика -->
+            <div class="mb-2">
+                <h5>Общая динамика по месяцам</h5>
+                <div style="max-width: 600px;">
+                    <canvas id="adminMonthlyChart" height="250" width="600"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // ===== МОЯ АНАЛИТИКА =====
+    {% if user_movie_titles %}
+    new Chart(document.getElementById('userMoviesChart'), {
+        type: 'bar',
+        data: { labels: {{ user_movie_titles | tojson }}, datasets: [{ label: 'Цитаты', data: {{ user_movie_counts | tojson }}, backgroundColor: 'rgba(54, 162, 235, 0.6)' }] },
+        options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+    {% endif %}
+    
+    {% if user_genre_names %}
+    new Chart(document.getElementById('userGenresChart'), {
+        type: 'pie',
+        data: { labels: {{ user_genre_names | tojson }}, datasets: [{ data: {{ user_genre_counts | tojson }}, backgroundColor: ['rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)','rgba(75,192,192,0.6)'] }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
+    });
+    {% endif %}
+    
+    new Chart(document.getElementById('userMonthlyChart'), {
+        type: 'line',
+        data: { labels: {{ months_ru | tojson }}, datasets: [{ label: 'Мои цитаты', data: {{ user_monthly_counts | tojson }}, borderColor: 'rgba(75,192,192,1)', tension: 0.1, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+    
+    {% if current_user.role == 'admin' %}
+    // ===== ОБЩАЯ АНАЛИТИКА =====
+    new Chart(document.getElementById('adminMoviesChart'), {
+        type: 'bar',
+        data: { labels: {{ admin_movie_titles | tojson }}, datasets: [{ label: 'Цитаты в системе', data: {{ admin_movie_counts | tojson }}, backgroundColor: 'rgba(255, 159, 64, 0.6)' }] },
+        options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+    
+    new Chart(document.getElementById('adminUsersChart'), {
+        type: 'bar',
+        data: { labels: {{ user_names | tojson }}, datasets: [{ label: 'Цитаты', data: {{ user_counts | tojson }}, backgroundColor: 'rgba(153, 102, 255, 0.6)' }] },
+        options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+    
+    new Chart(document.getElementById('adminGenresChart'), {
+        type: 'pie',
+        data: { labels: {{ admin_genre_names | tojson }}, datasets: [{ data: {{ admin_genre_counts | tojson }}, backgroundColor: ['rgba(255,99,132,0.6)','rgba(54,162,235,0.6)','rgba(255,206,86,0.6)','rgba(75,192,192,0.6)'] }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
+    });
+    
+    new Chart(document.getElementById('adminMonthlyChart'), {
+        type: 'line',
+        data: { labels: {{ months_ru | tojson }}, datasets: [{ label: 'Всего цитат в системе', data: {{ admin_monthly_counts | tojson }}, borderColor: 'rgba(255,99,132,1)', tension: 0.1, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+    
+    // Переключение между блоками (только для админа)
+    const btnMy = document.getElementById('btnMyAnalytics');
+    const btnAdmin = document.getElementById('btnAdminAnalytics');
+    const myBlock = document.getElementById('myAnalyticsBlock');
+    const adminBlock = document.getElementById('adminAnalyticsBlock');
+    
+    btnMy.addEventListener('click', function() {
+        btnMy.classList.add('active'); btnMy.classList.remove('btn-outline-primary'); btnMy.classList.add('btn-primary');
+        btnAdmin.classList.remove('active'); btnAdmin.classList.remove('btn-primary'); btnAdmin.classList.add('btn-outline-primary');
+        myBlock.style.display = 'block'; adminBlock.style.display = 'none';
+    });
+    
+    btnAdmin.addEventListener('click', function() {
+        btnAdmin.classList.add('active'); btnAdmin.classList.remove('btn-outline-primary'); btnAdmin.classList.add('btn-primary');
+        btnMy.classList.remove('active'); btnMy.classList.remove('btn-primary'); btnMy.classList.add('btn-outline-primary');
+        myBlock.style.display = 'none'; adminBlock.style.display = 'block';
+    });
+    {% endif %}
+</script>
+{% endblock %}

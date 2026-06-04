@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<!-- Фильтр и сортировка -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Фильтр по фильму</label>
+        <select class="form-select" id="filter_movie">
+            <option value="all">Все фильмы</option>
+            {% set movies_set = quotes|map(attribute='movie')|unique|list %}
+            {% for movie in movies_set if movie %}
+                <option value="{{ movie.id }}">{{ movie.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Сортировка</label>
+        <select class="form-select" id="sort_order">
+            <option value="newest">Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+        </select>
+    </div>
+</div>
+
+<!-- Список цитат -->
+{% if quotes %}
+    <div id="quotes_list">
+        {% for quote in quotes %}
+            <div class="card mb-3 quote-card" data-movie-id="{{ quote.movie.id if quote.movie else 0 }}" data-date="{{ quote.created_at.isoformat() }}">
+                <div class="card-body">
+                    <p class="card-text quote-text">"{{ quote.text | nl2br | safe }}"</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Фильм: {{ quote.movie.title if quote.movie else 'Не указан' }}<br>
+                            {% if quote.character_name %}Персонаж: {{ quote.character_name }}<br>{% endif %}
+                            {% if quote.timestamp %}Таймкод: {{ quote.timestamp }}<br>{% endif %}
+                            Добавлено: {{ quote.created_at.strftime('%d.%m.%Y') }}
+                        </small>
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('quote_detail', id=quote.id) }}" class="btn btn-sm btn-info">Подробнее</a>
+                        <a href="{{ url_for('edit_quote', id=quote.id) }}" class="btn btn-sm btn-warning">Редактировать</a>
+                        <a href="#" class="btn btn-sm btn-danger delete-btn" data-url="{{ url_for('delete_quote', id=quote.id) }}">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        У вас пока нет цитат. Добавьте первую через кнопку в шапке!
+    </div>
+{% endif %}
+
+<!-- JavaScript для фильтрации и сортировки -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterSelect = document.getElementById('filter_movie');
+        const sortSelect = document.getElementById('sort_order');
+        const quotesList = document.getElementById('quotes_list');
+        
+        // Сохраняем оригинальный порядок элементов при загрузке
+        let originalQuotes = Array.from(document.querySelectorAll('.quote-card'));
+        
+        function filterAndSort() {
+            const selectedMovie = filterSelect.value;
+            const sortOrder = sortSelect.value;
+            
+            // Берём всегда из оригинального списка, а не из текущего DOM
+            let quotes = [...originalQuotes];
+            
+            // Фильтрация
+            if (selectedMovie !== 'all') {
+                quotes = quotes.filter(q => q.dataset.movieId === selectedMovie);
+            }
+            
+            // Сортировка
+            quotes.sort((a, b) => {
+                const dateA = new Date(a.dataset.date);
+                const dateB = new Date(b.dataset.date);
+                return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+            });
+            
+            // Очищаем и заново заполняем
+            quotesList.innerHTML = '';
+            quotes.forEach(q => quotesList.appendChild(q));
+        }
+        
+        filterSelect.addEventListener('change', filterAndSort);
+        sortSelect.addEventListener('change', filterAndSort);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Новая цитата</h3>
+            </div>
+            <div class="card-body">
+                <!-- Форма добавления цитаты -->
+                <form method="POST" action="" id="quoteForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Выбор фильма -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Фильм:</label>
+                        {{ form.movie_id(class="form-select", id="movieSelect") }}
+                        {% for error in form.movie_id.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Блок добавления нового фильма -->
+                    <div class="card mb-4 border-success">
+                        <div class="card-header bg-success text-white py-2">
+                            <span class="fw-bold">+ Добавить новый фильм</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-2">
+                                    <label class="form-label">Название:</label>
+                                    <input type="text" class="form-control" id="newMovieTitle" placeholder="Например: Терминатор">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Режиссёр:</label>
+                                    <input type="text" class="form-control" id="newMovieDirector" placeholder="Например: Джеймс Кэмерон">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Год:</label>
+                                    <input type="text" class="form-control" id="newMovieYear" placeholder="Например: 1984">
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Жанр:</label>
+                                    <select class="form-select" id="newMovieGenre">
+                                        <option value="">-- Выберите жанр --</option>
+                                        {% for genre in genres %}
+                                            <option value="{{ genre.id }}">{{ genre.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-success btn-sm" id="saveNewMovieBtn">Сохранить фильм</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="clearMovieFormBtn">Отмена</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Текст цитаты -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Текст цитаты:</label>
+                        {{ form.text(class="form-control", rows=4, placeholder="Введите текст цитаты...") }}
+                        {% for error in form.text.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Персонаж и таймкод -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Персонаж:</label>
+                            {{ form.character_name(class="form-control", placeholder="Например: Терминатор") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Таймкод:</label>
+                            {{ form.timestamp(class="form-control", placeholder="чч:мм:сс") }}
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопки -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Отмена</a>
+                        {{ form.submit(class="btn btn-primary", value="Сохранить цитату") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Очистка формы добавления фильма
+    document.getElementById('clearMovieFormBtn').addEventListener('click', function() {
+        document.getElementById('newMovieTitle').value = '';
+        document.getElementById('newMovieDirector').value = '';
+        document.getElementById('newMovieYear').value = '';
+        document.getElementById('newMovieGenre').value = '';
+    });
+    
+    // Сохранение нового фильма
+    document.getElementById('saveNewMovieBtn').addEventListener('click', function() {
+        const title = document.getElementById('newMovieTitle').value.trim();
+        if (!title) {
+            alert('Введите название фильма');
+            return;
+        }
+        
+        const genreId = document.getElementById('newMovieGenre').value;
+        if (!genreId) {
+            alert('Выберите жанр');
+            return;
+        }
+        
+        fetch('/movie/add/ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify({
+                title: title,
+                release_year: document.getElementById('newMovieYear').value,
+                director: document.getElementById('newMovieDirector').value,
+                genre_id: genreId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Добавляем фильм в выпадающий список
+                const select = document.getElementById('movieSelect');
+                const option = document.createElement('option');
+                option.value = data.movie_id;
+                option.text = data.movie_title;
+                select.appendChild(option);
+                select.value = data.movie_id;
+                
+                // Очищаем форму добавления фильма
+                document.getElementById('newMovieTitle').value = '';
+                document.getElementById('newMovieDirector').value = '';
+                document.getElementById('newMovieYear').value = '';
+                document.getElementById('newMovieGenre').value = '';
+                
+                // Небольшое уведомление
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                successDiv.innerHTML = `Фильм "${data.movie_title}" добавлен! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                document.getElementById('movieSelect').parentNode.appendChild(successDiv);
+                
+                // Убираем уведомление через 3 секунды
+                setTimeout(() => successDiv.remove(), 3000);
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Ошибка при добавлении фильма');
+        });
+    });
+</script>
+{% endblock %}
