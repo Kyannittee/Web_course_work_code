@@ -719,7 +719,8 @@ def create_app():
         return render_template('import.html')
     
     return app
-      
+
+app = create_app()
 
 if __name__ == '__main__':
     # Проверяем наличие секретного ключа
@@ -730,8 +731,6 @@ if __name__ == '__main__':
     if not os.environ.get('DB_PASSWORD'):
         print("ERROR: DB_PASSWORD environment variable is not set!")
         exit(1)
-
-    app = create_app()
     
     with app.app_context():
         db.create_all()
