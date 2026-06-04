@@ -31,21 +31,30 @@ def admin_required(f):
 
 def create_app():
     app = Flask(__name__)
-    
+
+    # 1. Секретный ключ
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
-    
-    # Формируем строку подключения к БД
-    db_host = os.environ.get('DB_HOST', 'localhost')
-    db_port = os.environ.get('DB_PORT', '5432')
-    db_user = os.environ.get('DB_USER', 'postgres')
-    db_password = os.environ.get('DB_PASSWORD', '')
-    db_name = os.environ.get('DB_NAME', 'quote_db')
-    
-    # Проверяем, что пароль задан
-    if not db_password:
-        raise ValueError("DB_PASSWORD environment variable is not set!")
-    
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+
+    # 2. Адрес базы данных
+    database_url = os.environ.get('DATABASE_URL')
+
+    if database_url:
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        # Если DATABASE_URL нет, пробуем собрать из отдельных переменных (локальная разработка)
+        db_host = os.environ.get('DB_HOST', 'localhost')
+        db_port = os.environ.get('DB_PORT', '5432')
+        db_user = os.environ.get('DB_USER', 'postgres')
+        db_password = os.environ.get('DB_PASSWORD', '')
+        db_name = os.environ.get('DB_NAME', 'quote_db')
+
+        if not db_password:
+            raise ValueError("DB_PASSWORD environment variable is not set for local development!")
+
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Инициализация расширений
