@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField
-from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Optional, Regexp, EqualTo, ValidationError
 from models import User, Genre, Movie  
 
 class RegistrationForm(FlaskForm):
@@ -23,7 +23,11 @@ class LoginForm(FlaskForm):
 class QuoteForm(FlaskForm):
     text = TextAreaField('Текст цитаты', validators=[DataRequired()])
     character_name = StringField('Персонаж (опционально)')
-    timestamp = StringField('Таймкод (опционально)', render_kw={"placeholder": "чч:мм:сс"})
+    timestamp = StringField('Таймкод', validators=[
+        Optional(),
+        Regexp(r'^\d{1,2}:\d{2}(:\d{2})?$', 
+               message='Таймкод должен быть в формате MM:SS или HH:MM:SS')
+    ])
     movie_id = SelectField('Фильм', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Сохранить цитату')
     
