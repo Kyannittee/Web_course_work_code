@@ -14,7 +14,7 @@
                     
                     <div class="mb-3">
                         {{ form.title.label(class="form-label") }}
-                        {{ form.title(class="form-control", placeholder="Терминатор") }}
+                        {{ form.title(class="form-control", placeholder="Например: Терминатор") }}
                         {% if form.title.errors %}
                             <div class="text-danger small mt-1">
                                 {% for error in form.title.errors %}
