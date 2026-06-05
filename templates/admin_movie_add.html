@@ -14,19 +14,40 @@
                     
                     <div class="mb-3">
                         {{ form.title.label(class="form-label") }}
-                        {{ form.title(class="form-control") }}
+                        {{ form.title(class="form-control", placeholder="Например: Терминатор") }}
+                        {% if form.title.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.title.errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
                         {{ form.release_year.label(class="form-label") }}
-                        {{ form.release_year(class="form-control") }}
+                        {{ form.release_year(class="form-control", placeholder="Например: 1994") }}
+                        {% if form.release_year.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.release_year.errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
                         {{ form.director.label(class="form-label") }}
-                        {{ form.director(class="form-control") }}
+                        {{ form.director(class="form-control", placeholder="Например: Кристофер Нолан") }}
+                        {% if form.director.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.director.errors %}
+                                    {{ error }}<br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    
+                                        
                     <div class="mb-3">
                         {{ form.genre_id.label(class="form-label") }}
                         {{ form.genre_id(class="form-select") }}

@@ -31,15 +31,18 @@
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label class="form-label">Название:</label>
-                                    <input type="text" class="form-control" id="newMovieTitle" placeholder="Например: Терминатор">
+                                    <input type="text" class="form-control" id="newMovieTitle" 
+                                        placeholder="Например: Терминатор" maxlength="100"> 
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <label class="form-label">Режиссёр:</label>
-                                    <input type="text" class="form-control" id="newMovieDirector" placeholder="Например: Джеймс Кэмерон">
+                                    <input type="text" class="form-control" id="newMovieDirector" 
+                                        placeholder="Например: Джеймс Кэмерон" maxlength="100">
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <label class="form-label">Год:</label>
-                                    <input type="text" class="form-control" id="newMovieYear" placeholder="Например: 1984">
+                                    <input type="number" class="form-control" id="newMovieYear" 
+                                        placeholder="Например: 1984" min="1888" max="2026">
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <label class="form-label">Жанр:</label>
@@ -80,7 +83,6 @@
                                 </div>
                             {% endif %}
                         </div>
-                    </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Таймкод:</label>
                             {{ form.timestamp(class="form-control", placeholder="MM:SS или HH:MM:SS") }}
