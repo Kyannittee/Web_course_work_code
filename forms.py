@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField
-from wtforms.validators import DataRequired, Length, Optional, Regexp, IntegerField, NumberRange, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, SelectField, IntegerField, TextAreaField
+from wtforms.validators import DataRequired, Length, Optional, Regexp, NumberRange, EqualTo, ValidationError
 from models import User, Genre, Movie  
 
 class RegistrationForm(FlaskForm):
