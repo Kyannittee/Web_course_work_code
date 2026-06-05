@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField
-from wtforms.validators import DataRequired, Length, Optional, Regexp, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Optional, Regexp, IntegerField, NumberRange, EqualTo, ValidationError
 from models import User, Genre, Movie  
 
 class RegistrationForm(FlaskForm):
@@ -22,7 +22,10 @@ class LoginForm(FlaskForm):
 
 class QuoteForm(FlaskForm):
     text = TextAreaField('Текст цитаты', validators=[DataRequired()])
-    character_name = StringField('Персонаж (опционально)')
+    character_name = StringField('Персонаж', validators=[
+        Optional(),
+        Length(max=100, message='Имя персонажа не может быть длиннее 100 символов')
+    ])
     timestamp = StringField('Таймкод', validators=[
         Optional(),
         Regexp(r'^\d{1,2}:\d{2}(:\d{2})?$', 
@@ -37,8 +40,15 @@ class QuoteForm(FlaskForm):
 
 class MovieForm(FlaskForm):
     title = StringField('Название фильма', validators=[DataRequired()])
-    release_year = StringField('Год выпуска')
-    director = StringField('Режиссёр')
+    release_year = IntegerField('Год выпуска', validators=[
+        Optional(),
+        NumberRange(min=1888, max=2026, 
+                   message='Год должен быть между 1888 и 2026')
+    ])
+    director = StringField('Режиссёр', validators=[
+        Optional(),
+        Length(max=100, message='Имя режиссёра не может быть длиннее 100 символов')
+    ])
     genre_id = SelectField('Жанр', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Добавить фильм')
     
