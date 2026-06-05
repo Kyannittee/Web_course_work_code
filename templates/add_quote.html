@@ -72,7 +72,15 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Персонаж:</label>
                             {{ form.character_name(class="form-control", placeholder="Например: Терминатор") }}
+                            {% if form.character_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.character_name.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
+                    </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Таймкод:</label>
                             {{ form.timestamp(class="form-control", placeholder="MM:SS или HH:MM:SS") }}
