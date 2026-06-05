@@ -75,7 +75,10 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Таймкод:</label>
-                            {{ form.timestamp(class="form-control", placeholder="чч:мм:сс") }}
+                            {{ form.timestamp(class="form-control", placeholder="MM:SS или HH:MM:SS") }}
+                            {% for error in form.timestamp.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
                     </div>
                     
