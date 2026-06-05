@@ -36,6 +36,13 @@
                             <div class="mb-3">
                                 {{ form.character_name.label(class="form-label") }}
                                 {{ form.character_name(class="form-control") }}
+                                {% if form.character_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.character_name.errors %}
+                                            {{ error }}<br>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6">
