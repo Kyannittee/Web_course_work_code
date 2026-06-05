@@ -41,7 +41,10 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 {{ form.timestamp.label(class="form-label") }}
-                                {{ form.timestamp(class="form-control") }}
+                                {{ form.timestamp(class="form-control", placeholder="MM:SS или HH:MM:SS") }}
+                                {% for error in form.timestamp.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
