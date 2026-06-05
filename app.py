@@ -223,43 +223,67 @@ def create_app():
     @app.route('/movie/add/ajax', methods=['POST'])
     @login_required
     def add_movie_ajax():
-        data = request.get_json()
-        
-        title = data.get('title')
-        if not title:
-            return jsonify({'success': False, 'error': 'Название фильма обязательно'})
-        
-        # Проверка на существующий фильм
-        existing_movie = Movie.query.filter_by(title=title).first()
-        if existing_movie:
+        try:
+            data = request.get_json()
+            
+            title = data.get('title')
+            if not title:
+                return jsonify({'success': False, 'error': 'Название фильма обязательно'})
+            
+            if len(title) >    100:
+                return jsonify({'success': False, 'error': 'Название не может быть длиннее 255 символов'})
+            
+            # Проверка режиссёра
+            director = data.get('director')
+            if director and len(director) > 100:
+                return jsonify({'success': False, 'error': 'Имя режиссёра не может быть длиннее 255 символов'})
+            
+            from datetime import datetime
+            current_year = datetime.now().year
+            
+            release_year = data.get('release_year')
+            if release_year:
+                try:
+                    release_year = int(release_year)
+                    if release_year < 1888 or release_year > current_year:
+                        return jsonify({'success': False, 'error': f'Год должен быть между 1888 и {current_year}'})
+                except (ValueError, TypeError):
+                    return jsonify({'success': False, 'error': 'Год должен быть числом'})
+            else:
+                release_year = None
+            
+            # Проверка существующего фильма
+            existing_movie = Movie.query.filter_by(title=title).first()
+            if existing_movie:
+                return jsonify({
+                    'success': True,
+                    'movie_id': existing_movie.id,
+                    'movie_title': existing_movie.title,
+                    'exists': True
+                })
+            
+            genre_id = data.get('genre_id')
+            if not genre_id:
+                return jsonify({'success': False, 'error': 'Выберите жанр'})
+            
+            movie = Movie(
+                title=title,
+                release_year=release_year,
+                director=director,
+                genre_id=int(genre_id),
+                added_by=current_user.id
+            )
+            db.session.add(movie)
+            db.session.commit()
+            
             return jsonify({
-                'success': True,  
-                'movie_id': existing_movie.id,
-                'movie_title': existing_movie.title,
-                'exists': True
+                'success': True,
+                'movie_id': movie.id,
+                'movie_title': movie.title
             })
-    
-        genre_id = data.get('genre_id')
-        if genre_id:
-            genre_id = int(genre_id)
-        else:
-            genre_id = None
-    
-        movie = Movie(
-            title=title,
-            release_year=data.get('release_year') or None,
-            director=data.get('director') or None,
-            genre_id=genre_id,
-            added_by=current_user.id
-        )
-        db.session.add(movie)
-        db.session.commit()
-    
-        return jsonify({
-            'success': True,
-            'movie_id': movie.id,
-            'movie_title': movie.title
-        })
+            
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
     
     # Админ-панель (главная страница)
     @app.route('/admin')
@@ -743,6 +767,11 @@ def create_app():
             return redirect(url_for('index'))
     
         return render_template('import.html')
+
+    @app.context_processor
+    def inject_now():
+        from datetime import datetime
+        return {'now': datetime.now()}
     
     return app
 
