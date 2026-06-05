@@ -428,26 +428,26 @@ def create_app():
     @login_required
     @admin_required
     def admin_genre_edit(id):
-    genre = Genre.query.get_or_404(id)
-    form = GenreForm(obj=genre)
-    
-    if form.validate_on_submit():
-        # Проверяем, существует ли жанр с таким именем (кроме текущего)
-        existing_genre = Genre.query.filter(
-            Genre.name == form.name.data,
-            Genre.id != id
-        ).first()
+        genre = Genre.query.get_or_404(id)
+        form = GenreForm(obj=genre)
         
-        if existing_genre:
-            flash(f'Жанр "{form.name.data}" уже существует!', 'danger')
-            return render_template('admin_genre_form.html', form=form, title='Редактировать жанр')
+        if form.validate_on_submit():
+            # Проверяем, существует ли жанр с таким именем (кроме текущего)
+            existing_genre = Genre.query.filter(
+                Genre.name == form.name.data,
+                Genre.id != id
+            ).first()
+            
+            if existing_genre:
+                flash(f'Жанр "{form.name.data}" уже существует!', 'danger')
+                return render_template('admin_genre_form.html', form=form, title='Редактировать жанр')
+            
+            genre.name = form.name.data
+            db.session.commit()
+            flash(f'Жанр переименован в "{genre.name}"!', 'success')
+            return redirect(url_for('admin_genres'))
         
-        genre.name = form.name.data
-        db.session.commit()
-        flash(f'Жанр переименован в "{genre.name}"!', 'success')
-        return redirect(url_for('admin_genres'))
-    
-    return render_template('admin_genre_form.html', form=form, title='Редактировать жанр')
+        return render_template('admin_genre_form.html', form=form, title='Редактировать жанр')
 
     # Удаление жанра
     @app.route('/admin/genre/delete/<int:id>')
