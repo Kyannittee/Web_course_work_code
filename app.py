@@ -199,27 +199,6 @@ def create_app():
         flash('Вы вышли из системы', 'info')
         return redirect(url_for('login'))
     
-    # Добавление нового фильма 
-    @app.route('/movie/add', methods=['GET', 'POST'])
-    @login_required
-    def add_movie():
-        form = MovieForm()
-        
-        if form.validate_on_submit():
-            movie = Movie(
-                title=form.title.data,
-                release_year=form.release_year.data if form.release_year.data else None,
-                director=form.director.data,
-                genre_id=form.genre_id.data,
-                added_by=current_user.id
-            )
-            db.session.add(movie)
-            db.session.commit()
-            flash(f'Фильм "{movie.title}" успешно добавлен!', 'success')
-            return redirect(url_for('add_quote'))
-        
-        return render_template('add_movie.html', form=form)
-    
     @app.route('/movie/add/ajax', methods=['POST'])
     @login_required
     def add_movie_ajax():
@@ -307,6 +286,13 @@ def create_app():
     def admin_movie_add():
         form = MovieForm()
         if form.validate_on_submit():
+            # ПРОВЕРКА: существует ли уже такой фильм (регистронезависимо)
+            from sqlalchemy import func
+            existing = Movie.query.filter(func.lower(Movie.title) == func.lower(form.title.data)).first()
+            if existing:
+                flash(f'Фильм "{form.title.data}" уже существует!', 'danger')
+                return render_template('admin_movie_add.html', form=form)
+            
             movie = Movie(
                 title=form.title.data,
                 release_year=form.release_year.data if form.release_year.data else None,
