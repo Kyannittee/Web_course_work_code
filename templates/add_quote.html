@@ -142,12 +142,22 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Добавляем фильм в выпадающий список
+                // Добавляем фильм в выпадающий список (только если его там нет)
                 const select = document.getElementById('movieSelect');
-                const option = document.createElement('option');
-                option.value = data.movie_id;
-                option.text = data.movie_title;
-                select.appendChild(option);
+                let alreadyExists = false;
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value == data.movie_id) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                
+                if (!alreadyExists) {
+                    const option = document.createElement('option');
+                    option.value = data.movie_id;
+                    option.text = data.movie_title;
+                    select.appendChild(option);
+                }
                 select.value = data.movie_id;
                 
                 // Очищаем форму добавления фильма
@@ -156,10 +166,15 @@
                 document.getElementById('newMovieYear').value = '';
                 document.getElementById('newMovieGenre').value = '';
                 
-                // Небольшое уведомление
+                // Уведомление (разное для нового и существующего фильма)
                 const successDiv = document.createElement('div');
-                successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
-                successDiv.innerHTML = `Фильм "${data.movie_title}" добавлен! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                if (data.exists) {
+                    successDiv.className = 'alert alert-info alert-dismissible fade show mt-2';
+                    successDiv.innerHTML = `Фильм "${data.movie_title}" уже существует. Цитата будет добавлена к нему. <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                } else {
+                    successDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    successDiv.innerHTML = `Фильм "${data.movie_title}" добавлен! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                }
                 document.getElementById('movieSelect').parentNode.appendChild(successDiv);
                 
                 // Убираем уведомление через 3 секунды
