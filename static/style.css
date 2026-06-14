@@ -1,0 +1,79 @@
+/* Улучшение контрастности текста */
+body {
+    color: #2c3e50;
+}
+
+/* Шапка (навигация) */
+.navbar .navbar-nav .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.navbar .navbar-brand {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.navbar .dropdown-item {
+    color: #2c3e50;
+    font-weight: 300;
+}
+
+/* Карточки */
+.card-header {
+    background-color: #78c2ad !important;
+    color: white !important;
+}
+
+.card-header h3, 
+.card-header h4, 
+.card-header h5 {
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Кнопки */
+.btn-primary {
+    background-color: #78c2ad !important;
+    border-color: #78c2ad !important;
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Таблицы */
+.table {
+    color: #2c3e50 !important;
+}
+
+/* Общий текст */
+p, li, label {
+    color: #2c3e50;
+}
+
+/* Цитаты */
+.quote-text {
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #1a252f;
+    font-weight: 400;
+}
+
+/* Анимация карточек цитат */
+.quote-card {
+    transition: transform 0.2s;
+}
+
+.quote-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Модальные окна */
+.modal-title {
+    color: white !important;
+}
+
+.card .text-muted {
+    color: #1a252f !important;
+    opacity: 0.9;
+}
+
